@@ -9,5 +9,5 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-
+    test_database_url: str | None = None
 settings = Settings()
