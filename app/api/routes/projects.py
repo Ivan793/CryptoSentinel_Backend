@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -19,7 +21,7 @@ def list_projects(db: Session = Depends(get_db)):
 
 
 @router.get("/{project_id}", response_model=ProjectRead)
-def get_project(project_id: int, db: Session = Depends(get_db)):
+def get_project(project_id: uuid.UUID, db: Session = Depends(get_db)):
     project = project_service.get_project(db, project_id)
     if project is None:
         raise HTTPException(status_code=404, detail="Proyecto no encontrado")

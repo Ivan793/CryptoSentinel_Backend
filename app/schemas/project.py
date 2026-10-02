@@ -1,6 +1,9 @@
+import uuid
 from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
+
+from app.models.project import ProjectStatus
 
 
 class ProjectCreate(BaseModel):
@@ -13,8 +16,9 @@ class ProjectCreate(BaseModel):
 class ProjectRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: uuid.UUID
     name: str
     description: str | None
+    status: ProjectStatus
     created_at: datetime
     updated_at: datetime
