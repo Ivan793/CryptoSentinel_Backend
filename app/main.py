@@ -4,10 +4,12 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
-from app.api.routes import projects
+from app.api.routes import projects, rules
+
 
 app = FastAPI(title=settings.app_name, version="0.1.0")
 app.include_router(projects.router)
+app.include_router(rules.router)
 
 
 @app.get("/health")
