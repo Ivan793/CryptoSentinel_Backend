@@ -4,10 +4,14 @@ from datetime import datetime
 
 from sqlalchemy import DateTime, Enum as SAEnum, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship 
 
 from app.core.database import Base
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.scan import Scan
 
 class ProjectStatus(str, enum.Enum):
     ACTIVE = "ACTIVE"
@@ -33,4 +37,10 @@ class Project(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        
     )
+
+    scans: Mapped[list["Scan"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+
