@@ -10,7 +10,9 @@ from app.core.database import Base
 
 from typing import TYPE_CHECKING
 
+
 if TYPE_CHECKING:
+    from app.models.crypto_key import CryptoKey
     from app.models.scan import Scan
 
 class ProjectStatus(str, enum.Enum):
@@ -41,6 +43,10 @@ class Project(Base):
     )
 
     scans: Mapped[list["Scan"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+
+    crypto_keys: Mapped[list["CryptoKey"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
 

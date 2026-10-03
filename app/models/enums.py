@@ -13,3 +13,8 @@ class FindingStatus(str, enum.Enum):
     REVIEWED = "REVIEWED"
     FALSE_POSITIVE = "FALSE_POSITIVE"
     RESOLVED = "RESOLVED"
+
+class CryptoKeyStatus(str, enum.Enum):
+    ACTIVE = "ACTIVE"
+    EXPIRED = "EXPIRED"
+    REVOKED = "REVOKED"
