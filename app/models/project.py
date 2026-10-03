@@ -10,11 +10,10 @@ from app.core.database import Base
 
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from app.models.crypto_key import CryptoKey
     from app.models.scan import Scan
-
+    from app.models.security_event import SecurityEvent
 class ProjectStatus(str, enum.Enum):
     ACTIVE = "ACTIVE"
     ARCHIVED = "ARCHIVED"
@@ -47,6 +46,10 @@ class Project(Base):
     )
 
     crypto_keys: Mapped[list["CryptoKey"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+
+    security_events: Mapped[list["SecurityEvent"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
 
