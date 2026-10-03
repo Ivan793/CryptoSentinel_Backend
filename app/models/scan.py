@@ -10,8 +10,8 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 
 if TYPE_CHECKING:
+    from app.models.finding import Finding
     from app.models.project import Project
-
 
 class ScanStatus(str, enum.Enum):
     PENDING = "PENDING"
@@ -41,3 +41,7 @@ class Scan(Base):
     findings_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     project: Mapped["Project"] = relationship(back_populates="scans")
+
+    findings: Mapped[list["Finding"]] = relationship(
+        back_populates="scan", cascade="all, delete-orphan"
+    )

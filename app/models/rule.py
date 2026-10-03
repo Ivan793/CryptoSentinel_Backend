@@ -2,11 +2,15 @@ import uuid
 
 from sqlalchemy import Boolean, Enum as SAEnum, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 from app.models.enums import SeverityLevel
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.models.finding import Finding
 
 class Rule(Base):
     __tablename__ = "rules"
@@ -27,3 +31,5 @@ class Rule(Base):
     enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="true"
     )
+
+    findings: Mapped[list["Finding"]] = relationship(back_populates="rule")

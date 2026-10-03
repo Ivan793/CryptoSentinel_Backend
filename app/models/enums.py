@@ -6,3 +6,10 @@ class SeverityLevel(str, enum.Enum):
     MEDIUM = "MEDIUM"
     LOW = "LOW"
     INFO = "INFO"
+
+
+class FindingStatus(str, enum.Enum):
+    OPEN = "OPEN"
+    REVIEWED = "REVIEWED"
+    FALSE_POSITIVE = "FALSE_POSITIVE"
+    RESOLVED = "RESOLVED"
