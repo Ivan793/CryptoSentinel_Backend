@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from app.models.report import Report
 from app.models.scan import Scan
 from app.schemas.report import ReportCreate
+from app.models.enums import EventType
+from app.services.event_recorder import record_event
 
 
 class ScanNotFoundError(Exception):
@@ -23,10 +25,16 @@ def create_report(db: Session, scan_id: uuid.UUID, data: ReportCreate) -> Report
         project_id=scan.project_id,
         scan_id=scan_id,
         format=data.format,
-        # Ruta relativa generada por el servidor: el cliente no la controla.
         file_path=f"reports/{report_id}.{data.format.value.lower()}",
     )
     db.add(report)
+    record_event(
+        db,
+        EventType.REPORT_GENERATED,
+        f"Reporte {data.format.value} generado.",
+        project_id=scan.project_id,
+        scan_id=scan_id,
+    )
     db.commit()
     db.refresh(report)
     return report

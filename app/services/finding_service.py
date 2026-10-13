@@ -3,11 +3,12 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.enums import FindingStatus, SeverityLevel
+from app.models.enums import EventType, FindingStatus, SeverityLevel
 from app.models.finding import Finding
 from app.models.rule import Rule
 from app.models.scan import Scan
 from app.schemas.finding import FindingCreate
+from app.services.event_recorder import record_event
 
 
 class ScanNotFoundError(Exception):
@@ -56,9 +57,17 @@ def update_finding_status(
     finding = db.get(Finding, finding_id)
     if finding is None:
         return None
-    finding.status = new_status
-    db.commit()
-    db.refresh(finding)
+    if finding.status != new_status:  # un cambio "a lo mismo" no genera evento
+        finding.status = new_status
+        record_event(
+            db,
+            EventType.FINDING_REVIEWED,
+            f"Hallazgo {finding.rule.code} marcado como {new_status.value}.",
+            project_id=finding.scan.project_id,
+            scan_id=finding.scan_id,
+        )
+        db.commit()
+        db.refresh(finding)
     return finding
 
 def list_findings(

@@ -1,10 +1,19 @@
 import pytest
 
-PATHS = ["scans", "crypto-keys", "security-events", "reports", "findings"]
+# Elementos que crea _seed_two_projects por cada proyecto.
+# Eventos: 2, generados solos (SCAN_STARTED al crear el scan y REPORT_GENERATED al crear el reporte).
+PER_PROJECT = {
+    "scans": 1,
+    "crypto-keys": 1,
+    "security-events": 2,
+    "reports": 1,
+    "findings": 1,
+}
+PATHS = list(PER_PROJECT)
 
 
 def _seed_two_projects(client):
-    """Dos proyectos; cada uno con un scan, una clave, un evento, un reporte y un hallazgo."""
+    """Dos proyectos; cada uno con un scan, una clave, un reporte y un hallazgo."""
     rule = client.post(
         "/api/rules",
         json={
@@ -22,10 +31,6 @@ def _seed_two_projects(client):
             f"/api/projects/{project['id']}/crypto-keys",
             json={"key_identifier": f"KEY-{index}", "algorithm": "AES", "key_size": 256},
         )
-        client.post(
-            f"/api/projects/{project['id']}/security-events",
-            json={"event_type": "SCAN_COMPLETED", "scan_id": scan["id"]},
-        )
         client.post(f"/api/scans/{scan['id']}/reports", json={"format": "HTML"})
         client.post(
             f"/api/scans/{scan['id']}/findings",
@@ -38,14 +43,15 @@ def _seed_two_projects(client):
 @pytest.mark.parametrize("path", PATHS)
 def test_global_listing_and_project_filter(client, path):
     first, _ = _seed_two_projects(client)
+    per_project = PER_PROJECT[path]
 
     everything = client.get(f"/api/{path}")
     assert everything.status_code == 200
-    assert len(everything.json()) == 2
+    assert len(everything.json()) == per_project * 2
 
     filtered = client.get(f"/api/{path}", params={"project_id": first["id"]})
     assert filtered.status_code == 200
-    assert len(filtered.json()) == 1
+    assert len(filtered.json()) == per_project
 
 
 @pytest.mark.parametrize("path", PATHS)

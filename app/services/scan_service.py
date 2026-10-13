@@ -7,6 +7,8 @@ from app.models.project import Project
 from app.models.scan import Scan
 
 from datetime import datetime, timezone
+from app.models.enums import EventType
+from app.services.event_recorder import record_event
 
 class ProjectNotFoundError(Exception):
     """El project_id indicado no existe."""
@@ -21,6 +23,8 @@ def create_scan(db: Session, project_id: uuid.UUID) -> Scan:
 
     scan = Scan(project_id=project_id, started_at=datetime.now(timezone.utc))
     db.add(scan)
+    db.flush()  # asigna scan.id sin cerrar la transacción
+    record_event(db, EventType.SCAN_STARTED, "Análisis iniciado.", project_id, scan.id)
     db.commit()
     db.refresh(scan)
     return scan
