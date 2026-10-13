@@ -18,3 +18,7 @@ class CryptoKeyStatus(str, enum.Enum):
     ACTIVE = "ACTIVE"
     EXPIRED = "EXPIRED"
     REVOKED = "REVOKED"
+
+class ReportFormat(str, enum.Enum):
+    HTML = "HTML"
+    PDF = "PDF"

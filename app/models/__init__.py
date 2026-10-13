@@ -1,8 +1,9 @@
 from app.models.crypto_key import CryptoKey
 from app.models.finding import Finding
 from app.models.project import Project
+from app.models.report import Report
 from app.models.rule import Rule
 from app.models.scan import Scan
 from app.models.security_event import SecurityEvent
 
-__all__ = ["CryptoKey", "Finding", "Project", "Rule", "Scan", "SecurityEvent"]
+__all__ = ["CryptoKey", "Finding", "Project", "Report", "Rule", "Scan", "SecurityEvent"]
