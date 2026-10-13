@@ -10,7 +10,7 @@ def _create_scan(client, project_id):
 
 
 def _report_payload(**overrides):
-    data = {"format": "PDF", "file_path": "/reports/demo-bank-scan-001.pdf"}
+    data = {"format": "PDF"}
     data.update(overrides)
     return data
 
@@ -64,3 +64,14 @@ def test_list_reports_for_project_across_scans(client):
 
 def test_get_report_not_found(client):
     assert client.get(f"/api/reports/{uuid.uuid4()}").status_code == 404
+
+def test_report_file_path_is_generated_by_server(client):
+    project = _create_project(client)
+    scan = _create_scan(client, project["id"])
+    response = client.post(
+        f"/api/scans/{scan['id']}/reports",
+        json=_report_payload(file_path="../../etc/passwd"),  # se ignora
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["file_path"] == f"reports/{body['id']}.pdf"

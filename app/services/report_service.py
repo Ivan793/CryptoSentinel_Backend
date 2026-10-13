@@ -17,7 +17,15 @@ def create_report(db: Session, scan_id: uuid.UUID, data: ReportCreate) -> Report
     if scan is None:
         raise ScanNotFoundError(scan_id)
 
-    report = Report(scan_id=scan_id, project_id=scan.project_id, **data.model_dump())
+    report_id = uuid.uuid4()
+    report = Report(
+        id=report_id,
+        project_id=scan.project_id,
+        scan_id=scan_id,
+        format=data.format,
+        # Ruta relativa generada por el servidor: el cliente no la controla.
+        file_path=f"reports/{report_id}.{data.format.value.lower()}",
+    )
     db.add(report)
     db.commit()
     db.refresh(report)

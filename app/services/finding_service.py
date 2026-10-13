@@ -21,15 +21,16 @@ class RuleNotFoundError(Exception):
 def create_finding(db: Session, scan_id: uuid.UUID, data: FindingCreate) -> Finding:
     if db.get(Scan, scan_id) is None:
         raise ScanNotFoundError(scan_id)
-    if db.get(Rule, data.rule_id) is None:
+    rule = db.get(Rule, data.rule_id)
+    if rule is None:
         raise RuleNotFoundError(data.rule_id)
 
-    finding = Finding(scan_id=scan_id, **data.model_dump())
+    # La severidad pertenece a la regla (sección 9): se copia, no se recibe.
+    finding = Finding(scan_id=scan_id, severity=rule.severity, **data.model_dump())
     db.add(finding)
     db.commit()
     db.refresh(finding)
     return finding
-
 
 def list_findings_for_scan(
     db: Session,

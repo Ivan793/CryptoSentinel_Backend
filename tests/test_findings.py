@@ -35,7 +35,6 @@ def _finding_payload(rule_id, **overrides):
         "line_number": 15,
         "evidence": "password = 'ab****ef'",
         "description": "Se detectó un posible secreto embebido en el código.",
-        "severity": "HIGH",
     }
     data.update(overrides)
     return data
@@ -100,3 +99,12 @@ def test_update_finding_status_invalid_value(client):
     ).json()
     response = client.patch(f"/api/findings/{created['id']}", json={"status": "CERRADO"})
     assert response.status_code == 422
+
+def test_finding_severity_comes_from_rule(client):
+    _, scan, rule = _setup(client)  # la regla es HIGH
+    response = client.post(
+        f"/api/scans/{scan['id']}/findings",
+        json=_finding_payload(rule["id"], severity="LOW"),  # el cliente intenta forzarla
+    )
+    assert response.status_code == 201
+    assert response.json()["severity"] == "HIGH"

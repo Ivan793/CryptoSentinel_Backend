@@ -14,7 +14,7 @@ class FindingCreate(BaseModel):
     line_number: int = Field(ge=1)
     evidence: str | None = Field(default=None, max_length=2000)
     description: str | None = Field(default=None, max_length=2000)
-    severity: SeverityLevel
+    
 
 
 class FindingStatusUpdate(BaseModel):
