@@ -48,3 +48,9 @@ def list_reports_for_project(db: Session, project_id: uuid.UUID) -> list[Report]
 
 def get_report(db: Session, report_id: uuid.UUID) -> Report | None:
     return db.get(Report, report_id)
+
+def list_reports(db: Session, project_id: uuid.UUID | None = None) -> list[Report]:
+    stmt = select(Report).order_by(Report.generated_at.desc())
+    if project_id is not None:
+        stmt = stmt.where(Report.project_id == project_id)
+    return list(db.scalars(stmt))

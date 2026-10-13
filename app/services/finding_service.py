@@ -60,3 +60,21 @@ def update_finding_status(
     db.commit()
     db.refresh(finding)
     return finding
+
+def list_findings(
+    db: Session,
+    project_id: uuid.UUID | None = None,
+    scan_id: uuid.UUID | None = None,
+    severity: SeverityLevel | None = None,
+    status: FindingStatus | None = None,
+) -> list[Finding]:
+    stmt = select(Finding)
+    if project_id is not None:
+        stmt = stmt.join(Scan, Finding.scan_id == Scan.id).where(Scan.project_id == project_id)
+    if scan_id is not None:
+        stmt = stmt.where(Finding.scan_id == scan_id)
+    if severity is not None:
+        stmt = stmt.where(Finding.severity == severity)
+    if status is not None:
+        stmt = stmt.where(Finding.status == status)
+    return list(db.scalars(stmt.order_by(Finding.created_at.desc())))

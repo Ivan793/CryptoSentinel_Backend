@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -38,3 +38,9 @@ def get_report(report_id: uuid.UUID, db: Session = Depends(get_db)):
     if report is None:
         raise HTTPException(status_code=404, detail="Reporte no encontrado")
     return report
+
+@router.get("/reports", response_model=list[ReportRead])
+def list_all_reports(
+    project_id: uuid.UUID | None = Query(default=None), db: Session = Depends(get_db)
+):
+    return report_service.list_reports(db, project_id)

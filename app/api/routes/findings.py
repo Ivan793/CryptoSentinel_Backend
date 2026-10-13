@@ -53,3 +53,19 @@ def update_finding_status(
     if finding is None:
         raise HTTPException(status_code=404, detail="Hallazgo no encontrado")
     return finding
+
+@router.get("/findings", response_model=list[FindingRead])
+def list_all_findings(
+    project_id: uuid.UUID | None = Query(default=None),
+    scan_id: uuid.UUID | None = Query(default=None),
+    severity: SeverityLevel | None = Query(default=None),
+    status_filter: FindingStatus | None = Query(default=None, alias="status"),
+    db: Session = Depends(get_db),
+):
+    return finding_service.list_findings(
+        db,
+        project_id=project_id,
+        scan_id=scan_id,
+        severity=severity,
+        status=status_filter,
+    )

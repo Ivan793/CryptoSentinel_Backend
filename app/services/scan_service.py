@@ -33,3 +33,9 @@ def list_scans_for_project(db: Session, project_id: uuid.UUID) -> list[Scan]:
 
 def get_scan(db: Session, scan_id: uuid.UUID) -> Scan | None:
     return db.get(Scan, scan_id)
+
+def list_scans(db: Session, project_id: uuid.UUID | None = None) -> list[Scan]:
+    stmt = select(Scan).order_by(Scan.started_at.desc())
+    if project_id is not None:
+        stmt = stmt.where(Scan.project_id == project_id)
+    return list(db.scalars(stmt))

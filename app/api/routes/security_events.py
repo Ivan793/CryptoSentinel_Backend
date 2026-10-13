@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -37,3 +37,9 @@ def get_security_event(event_id: uuid.UUID, db: Session = Depends(get_db)):
     if event is None:
         raise HTTPException(status_code=404, detail="Evento no encontrado")
     return event
+
+@router.get("/security-events", response_model=list[SecurityEventRead])
+def list_all_security_events(
+    project_id: uuid.UUID | None = Query(default=None), db: Session = Depends(get_db)
+):
+    return security_event_service.list_security_events(db, project_id)

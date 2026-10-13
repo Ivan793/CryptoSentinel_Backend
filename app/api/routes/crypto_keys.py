@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -51,3 +51,9 @@ def update_crypto_key_status(
     if crypto_key is None:
         raise HTTPException(status_code=404, detail="Clave no encontrada")
     return crypto_key
+
+@router.get("/crypto-keys", response_model=list[CryptoKeyRead])
+def list_all_crypto_keys(
+    project_id: uuid.UUID | None = Query(default=None), db: Session = Depends(get_db)
+):
+    return crypto_key_service.list_crypto_keys(db, project_id)

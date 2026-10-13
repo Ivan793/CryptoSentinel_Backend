@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -35,3 +35,9 @@ def get_scan(scan_id: uuid.UUID, db: Session = Depends(get_db)):
     if scan is None:
         raise HTTPException(status_code=404, detail="Análisis no encontrado")
     return scan
+
+@router.get("/scans", response_model=list[ScanRead])
+def list_all_scans(
+    project_id: uuid.UUID | None = Query(default=None), db: Session = Depends(get_db)
+):
+    return scan_service.list_scans(db, project_id)

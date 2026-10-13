@@ -43,3 +43,9 @@ def update_crypto_key_status(
     db.commit()
     db.refresh(crypto_key)
     return crypto_key
+
+def list_crypto_keys(db: Session, project_id: uuid.UUID | None = None) -> list[CryptoKey]:
+    stmt = select(CryptoKey).order_by(CryptoKey.created_at.desc())
+    if project_id is not None:
+        stmt = stmt.where(CryptoKey.project_id == project_id)
+    return list(db.scalars(stmt))
