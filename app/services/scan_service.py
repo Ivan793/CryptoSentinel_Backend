@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models.project import Project
 from app.models.scan import Scan
 
+from datetime import datetime, timezone
 
 class ProjectNotFoundError(Exception):
     """El project_id indicado no existe."""
@@ -14,12 +15,11 @@ class ProjectNotFoundError(Exception):
 def project_exists(db: Session, project_id: uuid.UUID) -> bool:
     return db.get(Project, project_id) is not None
 
-
 def create_scan(db: Session, project_id: uuid.UUID) -> Scan:
     if not project_exists(db, project_id):
         raise ProjectNotFoundError(project_id)
 
-    scan = Scan(project_id=project_id)
+    scan = Scan(project_id=project_id, started_at=datetime.now(timezone.utc))
     db.add(scan)
     db.commit()
     db.refresh(scan)

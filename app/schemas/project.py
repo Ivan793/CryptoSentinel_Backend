@@ -13,6 +13,10 @@ class ProjectCreate(BaseModel):
     description: str | None = Field(default=None, max_length=2000)
 
 
+class ProjectStatusUpdate(BaseModel):
+    status: ProjectStatus
+
+
 class ProjectRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -22,3 +26,5 @@ class ProjectRead(BaseModel):
     status: ProjectStatus
     created_at: datetime
     updated_at: datetime
+    scans_count: int = 0
+    last_scan_at: datetime | None = None

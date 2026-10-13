@@ -14,6 +14,7 @@ def test_create_scan(client):
     assert body["status"] == "PENDING"
     assert body["files_scanned"] == 0
     assert body["findings_count"] == 0
+    assert body["started_at"] is not None
     uuid.UUID(body["id"])
 
 
