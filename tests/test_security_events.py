@@ -2,17 +2,17 @@ import uuid
 
 
 def _create_project(client):
-    return client.post("/projects", json={"name": "DemoBank"}).json()
+    return client.post("/api/projects", json={"name": "DemoBank"}).json()
 
 
 def _create_scan(client, project_id):
-    return client.post(f"/projects/{project_id}/scans").json()
+    return client.post(f"/api/projects/{project_id}/scans").json()
 
 
 def test_create_security_event_without_scan(client):
     project = _create_project(client)
     response = client.post(
-        f"/projects/{project['id']}/security-events",
+        f"/api/projects/{project['id']}/security-events",
         json={"event_type": "PROJECT_CREATED", "description": "Proyecto registrado."},
     )
     assert response.status_code == 201
@@ -26,7 +26,7 @@ def test_create_security_event_with_scan(client):
     project = _create_project(client)
     scan = _create_scan(client, project["id"])
     response = client.post(
-        f"/projects/{project['id']}/security-events",
+        f"/api/projects/{project['id']}/security-events",
         json={
             "event_type": "SCAN_COMPLETED",
             "description": "Security scan completed successfully.",
@@ -39,7 +39,7 @@ def test_create_security_event_with_scan(client):
 
 def test_create_security_event_project_not_found(client):
     response = client.post(
-        f"/projects/{uuid.uuid4()}/security-events",
+        f"/api/projects/{uuid.uuid4()}/security-events",
         json={"event_type": "PROJECT_CREATED"},
     )
     assert response.status_code == 404
@@ -48,7 +48,7 @@ def test_create_security_event_project_not_found(client):
 def test_create_security_event_scan_not_found(client):
     project = _create_project(client)
     response = client.post(
-        f"/projects/{project['id']}/security-events",
+        f"/api/projects/{project['id']}/security-events",
         json={"event_type": "SCAN_COMPLETED", "scan_id": str(uuid.uuid4())},
     )
     assert response.status_code == 404
@@ -57,12 +57,12 @@ def test_create_security_event_scan_not_found(client):
 def test_list_security_events_ordered_desc(client):
     project = _create_project(client)
     client.post(
-        f"/projects/{project['id']}/security-events", json={"event_type": "EVENT_A"}
+        f"/api/projects/{project['id']}/security-events", json={"event_type": "EVENT_A"}
     )
     client.post(
-        f"/projects/{project['id']}/security-events", json={"event_type": "EVENT_B"}
+        f"/api/projects/{project['id']}/security-events", json={"event_type": "EVENT_B"}
     )
-    response = client.get(f"/projects/{project['id']}/security-events")
+    response = client.get(f"/api/projects/{project['id']}/security-events")
     assert response.status_code == 200
     events = response.json()
     assert len(events) == 2
@@ -70,4 +70,4 @@ def test_list_security_events_ordered_desc(client):
 
 
 def test_get_security_event_not_found(client):
-    assert client.get(f"/security-events/{uuid.uuid4()}").status_code == 404
+    assert client.get(f"/api/security-events/{uuid.uuid4()}").status_code == 404

@@ -1,19 +1,28 @@
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.api.routes import (
+    crypto_keys, findings, projects, reports, rules, scans, security_events,
+)
 from app.core.config import settings
 from app.core.database import get_db
-from app.api.routes import projects, rules, scans, findings, crypto_keys, security_events, reports 
 
 app = FastAPI(title=settings.app_name, version="0.1.0")
-app.include_router(projects.router)
-app.include_router(rules.router)
-app.include_router(scans.router)
-app.include_router(findings.router)
-app.include_router(crypto_keys.router)
-app.include_router(security_events.router)
-app.include_router(reports.router)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_methods=["GET", "POST", "PATCH", "DELETE"],
+    allow_headers=["Content-Type"],
+)
+
+for router in (
+    projects.router, rules.router, scans.router, findings.router,
+    crypto_keys.router, security_events.router, reports.router,
+):
+    app.include_router(router, prefix="/api")
 
 
 @app.get("/health")

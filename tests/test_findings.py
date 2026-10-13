@@ -2,16 +2,16 @@ import uuid
 
 
 def _create_project(client):
-    return client.post("/projects", json={"name": "DemoBank"}).json()
+    return client.post("/api/projects", json={"name": "DemoBank"}).json()
 
 
 def _create_scan(client, project_id):
-    return client.post(f"/projects/{project_id}/scans").json()
+    return client.post(f"/api/projects/{project_id}/scans").json()
 
 
 def _create_rule(client, code="CRYPTO-001"):
     return client.post(
-        "/rules",
+     "/api/rules",
         json={
             "code": code,
             "name": "Potential Hardcoded Secret",
@@ -44,7 +44,7 @@ def _finding_payload(rule_id, **overrides):
 def test_create_finding(client):
     _, scan, rule = _setup(client)
     response = client.post(
-        f"/scans/{scan['id']}/findings", json=_finding_payload(rule["id"])
+        f"/api/scans/{scan['id']}/findings", json=_finding_payload(rule["id"])
     )
     assert response.status_code == 201
     body = response.json()
@@ -57,7 +57,7 @@ def test_create_finding(client):
 def test_create_finding_scan_not_found(client):
     _, _, rule = _setup(client)
     response = client.post(
-        f"/scans/{uuid.uuid4()}/findings", json=_finding_payload(rule["id"])
+        f"/api/scans/{uuid.uuid4()}/findings", json=_finding_payload(rule["id"])
     )
     assert response.status_code == 404
 
@@ -65,7 +65,7 @@ def test_create_finding_scan_not_found(client):
 def test_create_finding_rule_not_found(client):
     _, scan, _ = _setup(client)
     response = client.post(
-        f"/scans/{scan['id']}/findings", json=_finding_payload(str(uuid.uuid4()))
+        f"/api/scans/{scan['id']}/findings", json=_finding_payload(str(uuid.uuid4()))
     )
     assert response.status_code == 404
 
@@ -73,30 +73,30 @@ def test_create_finding_rule_not_found(client):
 def test_list_findings_filters_by_status(client):
     _, scan, rule = _setup(client)
     f1 = client.post(
-        f"/scans/{scan['id']}/findings", json=_finding_payload(rule["id"])
+        f"/api/scans/{scan['id']}/findings", json=_finding_payload(rule["id"])
     ).json()
-    client.post(f"/scans/{scan['id']}/findings", json=_finding_payload(rule["id"]))
+    client.post(f"/api/scans/{scan['id']}/findings", json=_finding_payload(rule["id"]))
 
-    client.patch(f"/findings/{f1['id']}", json={"status": "FALSE_POSITIVE"})
+    client.patch(f"/api/findings/{f1['id']}", json={"status": "FALSE_POSITIVE"})
 
     open_only = client.get(
-        f"/scans/{scan['id']}/findings", params={"status": "OPEN"}
+        f"/api/scans/{scan['id']}/findings", params={"status": "OPEN"}
     ).json()
     assert len(open_only) == 1
 
-    all_findings = client.get(f"/scans/{scan['id']}/findings").json()
+    all_findings = client.get(f"/api/scans/{scan['id']}/findings").json()
     assert len(all_findings) == 2
 
 
 def test_update_finding_status_not_found(client):
-    response = client.patch(f"/findings/{uuid.uuid4()}", json={"status": "RESOLVED"})
+    response = client.patch(f"/api/findings/{uuid.uuid4()}", json={"status": "RESOLVED"})
     assert response.status_code == 404
 
 
 def test_update_finding_status_invalid_value(client):
     _, scan, rule = _setup(client)
     created = client.post(
-        f"/scans/{scan['id']}/findings", json=_finding_payload(rule["id"])
+        f"/api/scans/{scan['id']}/findings", json=_finding_payload(rule["id"])
     ).json()
-    response = client.patch(f"/findings/{created['id']}", json={"status": "CERRADO"})
+    response = client.patch(f"/api/findings/{created['id']}", json={"status": "CERRADO"})
     assert response.status_code == 422
