@@ -30,3 +30,7 @@ class RuleRead(BaseModel):
     recommendation: str | None
     reference: str | None
     enabled: bool
+
+
+class RuleEnabledUpdate(BaseModel):
+    enabled: bool

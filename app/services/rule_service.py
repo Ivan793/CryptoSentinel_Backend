@@ -33,3 +33,12 @@ def list_rules(db: Session, enabled_only: bool = False) -> list[Rule]:
 
 def get_rule(db: Session, rule_id: uuid.UUID) -> Rule | None:
     return db.get(Rule, rule_id)
+
+def set_rule_enabled(db: Session, rule_id: uuid.UUID, enabled: bool) -> Rule | None:
+    rule = db.get(Rule, rule_id)
+    if rule is None:
+        return None
+    rule.enabled = enabled
+    db.commit()
+    db.refresh(rule)
+    return rule

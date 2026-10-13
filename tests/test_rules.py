@@ -48,3 +48,22 @@ def test_list_rules_filters_enabled(client):
 
 def test_get_rule_not_found(client):
     assert client.get(f"/api/rules/{uuid.uuid4()}").status_code == 404
+
+
+def test_toggle_rule_enabled(client):
+    rule = client.post("/api/rules", json=_sample_rule()).json()
+    response = client.patch(f"/api/rules/{rule['id']}", json={"enabled": False})
+    assert response.status_code == 200
+    assert response.json()["enabled"] is False
+    assert client.get(f"/api/rules/{rule['id']}").json()["enabled"] is False
+
+
+def test_toggle_rule_not_found(client):
+    response = client.patch(f"/api/rules/{uuid.uuid4()}", json={"enabled": False})
+    assert response.status_code == 404
+
+
+def test_toggle_rule_requires_enabled_field(client):
+    rule = client.post("/api/rules", json=_sample_rule()).json()
+    response = client.patch(f"/api/rules/{rule['id']}", json={})
+    assert response.status_code == 422

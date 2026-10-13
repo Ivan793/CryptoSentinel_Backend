@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.rule import RuleCreate, RuleRead
+from app.schemas.rule import RuleCreate, RuleEnabledUpdate, RuleRead
 from app.services import rule_service
 
 router = APIRouter(prefix="/rules", tags=["Rules"])
@@ -29,6 +29,16 @@ def list_rules(enabled_only: bool = Query(default=False), db: Session = Depends(
 @router.get("/{rule_id}", response_model=RuleRead)
 def get_rule(rule_id: uuid.UUID, db: Session = Depends(get_db)):
     rule = rule_service.get_rule(db, rule_id)
+    if rule is None:
+        raise HTTPException(status_code=404, detail="Regla no encontrada")
+    return rule
+
+
+@router.patch("/{rule_id}", response_model=RuleRead)
+def update_rule_enabled(
+    rule_id: uuid.UUID, data: RuleEnabledUpdate, db: Session = Depends(get_db)
+):
+    rule = rule_service.set_rule_enabled(db, rule_id, data.enabled)
     if rule is None:
         raise HTTPException(status_code=404, detail="Regla no encontrada")
     return rule
