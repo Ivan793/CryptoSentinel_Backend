@@ -1,15 +1,33 @@
+from contextlib import asynccontextmanager
+
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.routes import (
-    crypto_keys, findings, projects, reports, rules, scans, security_events,
+    crypto_keys,
+    findings,
+    projects,
+    reports,
+    rules,
+    scans,
+    security_events,
 )
 from app.core.config import settings
-from app.core.database import get_db
+from app.core.database import SessionLocal, get_db
+from app.services.rule_sync import sync_rules
 
-app = FastAPI(title=settings.app_name, version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    # Al arrancar, deja el catálogo de reglas del código reflejado en la tabla rules.
+    with SessionLocal() as db:
+        sync_rules(db)
+    yield
+
+
+app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -19,8 +37,13 @@ app.add_middleware(
 )
 
 for router in (
-    projects.router, rules.router, scans.router, findings.router,
-    crypto_keys.router, security_events.router, reports.router,
+    projects.router,
+    rules.router,
+    scans.router,
+    findings.router,
+    crypto_keys.router,
+    security_events.router,
+    reports.router,
 ):
     app.include_router(router, prefix="/api")
 
